@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ai Carbon Footprint</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        /* CSS Lengkap untuk Desain Halaman */
+        :root {
+            --primary-color: #00c6ff;
+            --secondary-color: #0072ff;
+            --background-color: #121212;
+            --card-color: #1e1e1e;
+            --text-color: #e0e0e0;
+            --label-color: #bbbbbb;
+            --border-color: #333333;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            color: var(--text-color);
+            background: linear-gradient(45deg, #0f2027, #203a43, #2c5364);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .container {
+            width: 100%;
+            max-width: 900px;
+            background-color: var(--card-color);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            padding: 2rem 3rem;
+            border: 1px solid var(--border-color);
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: -webkit-linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        header p {
+            color: var(--label-color);
+        }
+
+        .calculator-form .input-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .input-group label {
+            font-size: 0.9rem;
+            color: var(--label-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .input-group input, .input-group select {
+            background-color: var(--background-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 0.8rem;
+            color: var(--text-color);
+            font-family: 'Poppins', sans-serif;
+            font-size: 1rem;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        .input-group input:focus, .input-group select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(0, 198, 255, 0.2);
+        }
+
+        .calculate-btn {
+            display: block;
+            width: 100%;
+            padding: 1rem;
+            margin-top: 2rem;
+            border: none;
+            border-radius: 8px;
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            font-size: 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.3s;
+        }
+
+        .calculate-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 157, 204, 0.3);
+        }
+
+        .results-section {
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border-color);
+            display: none; /* Disembunyikan secara default */
+            text-align: center;
+        }
+        
+        #total-footprint {
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        #footprint-unit {
+            font-size: 1rem;
+            color: var(--label-color);
+        }
+        
+        .chart-container {
+            margin-top: 2rem;
+            position: relative;
+            height: 350px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>Ai Carbon Footprint</h1>
+            <p>Hitung estimasi emisi CO₂ bulanan Anda dari berbagai aktivitas harian.</p>
+        </header>
+
+        <form id="carbon-form" class="calculator-form">
+            <div class="input-grid">
+                <div class="input-group">
+                    <label for="listrik">⚡️ Penggunaan Listrik (kWh/bulan)</label>
+                    <input type="number" id="listrik" placeholder="Contoh: 150" required>
+                </div>
+                
+                <div class="input-group">
+                    <label for="jarak">🚗 Jarak Tempuh Kendaraan (km/bulan)</label>
+                    <input type="number" id="jarak" placeholder="Contoh: 500" value="0">
+                </div>
+
+                <div class="input-group">
+                    <label for="kendaraan">Tipe Kendaraan</label>
+                    <select id="kendaraan">
+                        <option value="0">Tidak punya</option>
+                        <option value="0.12">Mobil Bensin</option>
+                        <option value="0.11">Mobil Diesel</option>
+                        <option value="0.05">Motor</option>
+                        <option value="0.02">Mobil Listrik</option>
+                    </select>
+                </div>
+                
+                <div class="input-group">
+                    <label for="perangkat">📱 Penggunaan Perangkat (jam/hari)</label>
+                    <input type="number" id="perangkat" placeholder="Total jam laptop & smartphone" required>
+                </div>
+
+                <div class="input-group">
+                    <label for="air">💧 Penggunaan Air (m³/bulan)</label>
+                    <input type="number" id="air" placeholder="Contoh: 20" required>
+                </div>
+
+                <div class="input-group">
+                    <label for="diet">🥗 Pola Makan (Makanan & Minuman)</label>
+                    <select id="diet">
+                        <option value="100">Vegan</option>
+                        <option value="150">Vegetarian</option>
+                        <option value="250" selected>Rata-rata (Daging & Sayur)</option>
+                        <option value="400">Peminat Daging</option>
+                    </select>
+                </div>
+            </div>
+
+            <button type="submit" class="calculate-btn">Hitung Jejak Karbon Saya</button>
+        </form>
+
+        <section id="results" class="results-section">
+            <h2>Hasil Jejak Karbon Anda</h2>
+            <div>
+                <span id="total-footprint">0</span>
+                <span id="footprint-unit">kg CO₂e / bulan</span>
+            </div>
+            <div class="chart-container">
+                <canvas id="footprint-chart"></canvas>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        // JavaScript Lengkap untuk Kalkulasi dan Grafik
+        const carbonForm = document.getElementById('carbon-form');
+        const resultsSection = document.getElementById('results');
+        const totalFootprintEl = document.getElementById('total-footprint');
+        const chartCanvas = document.getElementById('footprint-chart');
+        let footprintChart; // Variabel untuk menyimpan instance chart
+
+        // Faktor Emisi (kg CO2e per unit). Ini adalah estimasi yang disederhanakan.
+        const factors = {
+            listrik: 0.85, // kg CO2e per kWh (rata-rata grid Indonesia yang didominasi batu bara)
+            perangkat: 0.06, // Rata-rata konsumsi listrik perangkat (60W) dikali faktor listrik
+            air: 0.708 // kg CO2e per m³ (untuk proses pengolahan dan distribusi)
+        };
+
+        carbonForm.addEventListener('submit', function(e) {
+            e.preventDefault(); // Mencegah form dari reload halaman
+
+            // 1. Mengambil Nilai dari Input
+            const listrik = parseFloat(document.getElementById('listrik').value);
+            const jarak = parseFloat(document.getElementById('jarak').value);
+            const faktorKendaraan = parseFloat(document.getElementById('kendaraan').value);
+            const jamPerangkat = parseFloat(document.getElementById('perangkat').value);
+            const air = parseFloat(document.getElementById('air').value);
+            const diet = parseFloat(document.getElementById('diet').value);
+
+            // 2. Menghitung Jejak Karbon per Kategori
+            const listrikCO2 = listrik * factors.listrik;
+            const transportasiCO2 = jarak * faktorKendaraan;
+            // Estimasi: (jam/hari * 30 hari * watt perangkat) / 1000 * faktor listrik
+            const perangkatCO2 = (jamPerangkat * 30 * factors.perangkat) * factors.listrik; 
+            const airCO2 = air * factors.air;
+            // Nilai diet sudah merupakan estimasi total bulanan
+            const dietCO2 = diet;
+
+            const totalFootprint = listrikCO2 + transportasiCO2 + perangkatCO2 + airCO2 + dietCO2;
+            
+            // 3. Menampilkan Hasil
+            resultsSection.style.display = 'block';
+            totalFootprintEl.innerText = totalFootprint.toFixed(2);
+            
+            // 4. Membuat atau Memperbarui Grafik
+            const chartData = {
+                labels: ['Listrik', 'Transportasi', 'Perangkat', 'Air', 'Diet'],
+                datasets: [{
+                    label: 'Jejak Karbon (kg CO₂e)',
+                    data: [
+                        listrikCO2.toFixed(2),
+                        transportasiCO2.toFixed(2),
+                        perangkatCO2.toFixed(2),
+                        airCO2.toFixed(2),
+                        dietCO2.toFixed(2)
+                    ],
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.6)',
+                        'rgba(54, 162, 235, 0.6)',
+                        'rgba(255, 206, 86, 0.6)',
+                        'rgba(75, 192, 192, 0.6)',
+                        'rgba(153, 102, 255, 0.6)'
+                    ],
+                    borderColor: [
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(153, 102, 255, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            };
+
+            if (footprintChart) {
+                footprintChart.destroy(); // Hancurkan chart lama sebelum membuat yang baru
+            }
+
+            footprintChart = new Chart(chartCanvas, {
+                type: 'bar', // Tipe grafik
+                data: chartData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false // Sembunyikan legenda
+                        },
+                        title: {
+                            display: true,
+                            text: 'Distribusi Emisi Karbon per Kategori',
+                            color: '#e0e0e0',
+                            font: {
+                                size: 16,
+                                family: 'Poppins'
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Emisi (kg CO₂e)',
+                                color: '#bbbbbb'
+                            },
+                            ticks: { color: '#bbbbbb' },
+                            grid: { color: '#333333' }
+                        },
+                        x: {
+                            ticks: { color: '#bbbbbb' },
+                            grid: { color: 'transparent' }
+                        }
+                    }
+                }
+            });
+            
+            // Scroll ke bagian hasil
+            resultsSection.scrollIntoView({ behavior: 'smooth' });
+        });
+    </script>
+</body>
+</html>
